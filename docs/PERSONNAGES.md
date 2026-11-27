@@ -1,13 +1,20 @@
-# L'Addition — Personnages et lore
+# L'Addition — Univers et personnages
 
-## Le ou la barista
-Le personnage joueur. On ne voit jamais son visage, seulement ses mains sur le comptoir. Son histoire se devine a travers les objets du cafe et les commandes qui le troublent. Plus la jauge de lucidite monte, plus ses souvenirs remontent.
+## La barista (personnage joueur)
+Une barista endettee tient le comptoir pendant sept jours. Son cafe est, sans
+qu'elle le mesure au debut, un seuil vers le monde des esprits. La dette et la
+fatigue nourrissent la jauge de lucidite / deni qui fait basculer l'ambiance.
 
-## Les habitues
-La Dame au the : toujours la premiere, polie, commande le meme the. A l'acte 2, elle commande des boissons que le cafe ne sert pas. L'Homme presse : regarde sans cesse une montre, sa patience est la plus courte, il attend quelqu'un qui n'arrive jamais. L'Enfant du fond : assis seul, ne commande rien, les adultes font comme s'il n'existait pas, il sourit quand le joueur se trompe.
+## Les clients
+Des habitues et des passants d'abord ordinaires. A mesure que l'ambiance se
+degrade, leurs commandes et leur presence deviennent etranges. La narration
+passe par eux et par le travail, pas par de longs dialogues.
 
-## Le cafe lui-meme
-Le lieu est un personnage. La disposition change entre les soirees : une porte de plus, une fenetre qui donne sur du noir, une chaise toujours occupee. Rien n'est souligne, le joueur doit le remarquer seul.
+## Le patron
+Figure d'autorite du cafe. Il sert notamment de jury dans le mode battle
+creativite, ou le joueur compose librement une recette pour le satisfaire.
 
-## Fil rouge
-Le cafe rejoue en boucle une derniere soiree qui s'est mal terminee. Chaque fin possible est une facon differente de comprendre ce qui est arrive, et a qui.
+## Le cafe, personnage a part entiere
+Lieu unique du jeu et antagoniste diffus : seuil entre deux mondes, il se
+deforme au rythme de la jauge. L'horreur nait de ce decor familier qui se
+detraque, pas du jump scare.
