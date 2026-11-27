@@ -1,19 +1,22 @@
 # L'Addition — Game Design Document
 
 ## Pitch
-L'Addition est un jeu de gestion de cafe qui glisse lentement vers l'horreur psychologique. Le joueur tient le comptoir d'un petit cafe de quartier. Au debut tout semble normal : on prend les commandes, on sert, on encaisse. Mais nuit apres nuit, les clients, les regles et le decor commencent a se deformer.
+L'Addition (titre de travail) est un jeu de gestion de cafe qui vire a l'horreur psychologique. Le joueur incarne une barista endettee qui doit tenir sept jours dans un cafe qui est en realite un seuil vers le monde des esprits. Le confort du rituel, preparer et servir des boissons, se detraque a mesure que l'ambiance se degrade. References mecaniques et narration : Dead Plate et Papers Please.
 
-## Intention
-Partir d'une boucle de gameplay rassurante et familiere, puis la detourner. Le confort du rituel, servir un cafe, devient la source de la tension. Le malaise nait de la repetition et des petites anomalies, pas du jump scare.
+## Forme
+Site web statique, trois pages : accueil, jeu, et une page concept / avancee du projet. Perimetre volontairement reduit, realisable en environ un mois et demi, en minimisant le code la ou ce n'est pas necessaire.
 
-## Boucle de jeu
-Un client arrive et passe commande. Le joueur prepare la boisson a la bonne recette, sert, puis encaisse le bon montant : l'addition. Le temps avance, la file grandit, la fatigue monte. Chaque soir ajoute une anomalie de plus a cette boucle.
+## Mecanique narrative centrale
+Une jauge de lucidite / deni accompagne le service. Plus la barista accumule erreurs et fatigue, plus le deni monte et plus le cafe bascule vers l'etrange. La narration passe par le travail, les commandes, le texte et l'ambiance, plutot que par de longs dialogues.
 
-## Les trois actes
-Acte 1, Le cafe : apprentissage des recettes, clients ordinaires, ambiance chaleureuse. Acte 2, Les habitues : les memes visages reviennent, leurs commandes changent sans raison, les regles se contredisent. Acte 3, La fermeture : le cafe n'ouvre plus sur la rue, et le joueur sert des clients qu'il reconnait trop bien.
+## Boucle sur sept jours
+Le jour : le service au comptoir, decrit en detail dans MECANIQUES.md. Le soir (optionnel) : une courte scene a l'appartement pour la narration, a couper en premier si le delai est serre. La performance de chaque journee influence l'ambiance de la suivante et oriente vers l'une des fins.
 
-## Ton et references
-Horreur lente, quotidienne, intime. Inspiration de Papers Please pour la boucle administrative repetitive, et de l'horreur domestique ou le familier devient etrange.
+## Battle creativite (bonus)
+Un mode ou le joueur compose librement une recette qu'un jury note. Peut servir de mecanique joker pour eviter de saturer la jauge. Hors perimetre si le temps manque.
 
-## Statut
-Document vivant. Les mecaniques detaillees et le lore arrivent dans des documents dedies.
+## Fins
+Plusieurs fins selon la performance cumulee sur les sept jours, a la maniere de Dead Plate. Techniquement, une simple evaluation de fin choisit la fin.
+
+## Documents lies
+MECANIQUES.md pour le detail du gameplay et les valeurs de depart. Le game design detaille, la direction artistique et une maquette HTML de l'accumulation sur sept jours existent par ailleurs dans les documents de travail du projet.
