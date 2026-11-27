@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Addition — prototype</title>
+<style>
+  :root{
+    --bg:#1c1a17; --panel:#26231f; --line:#3a352e; --ink:#efe7da;
+    --muted:#a99f8f; --accent:#c9a15a; --green:#6fae4a; --orange:#d79a3a; --red:#cf5b4e;
+    --spirit:#7fe0a8;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--ink);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    transition:background .8s ease, color .8s ease;
+  }
+  /* Degradation de l'ambiance : la lucidite baisse, le cafe bascule vers l'etrange */
+  body.amb1{ --ink:#dfe9d6; background:#1a1d18; }
+  body.amb2{ --ink:var(--spirit); --muted:#6fae8a; background:#141a16; }
+  body.amb2 .queue, body.amb2 #prep{ filter:hue-rotate(10deg) }
+  header{width:100%;max-width:880px;padding:18px 20px 6px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+  h1{font-size:22px;margin:0;letter-spacing:.5px}
+  h1 small{display:block;font-size:12px;color:var(--muted);font-weight:400;letter-spacing:2px;text-transform:uppercase}
+  .hud{display:flex;gap:18px;font-size:14px;text-align:right}
+  .hud b{display:block;font-size:20px;color:var(--accent)}
+  main{width:100%;max-width:880px;padding:12px 20px 40px;flex:1}
+  .queue{display:flex;gap:12px;min-height:150px;margin-bottom:14px}
+  .client{
+    flex:1;max-width:33%;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:12px;cursor:pointer;position:relative;transition:transform .15s, border-color .15s;
+  }
+  .client:hover{transform:translateY(-3px)}
+  .client.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(201,161,90,.3)}
+  .client .face{font-size:34px;line-height:1}
+  .client .order{font-size:13px;color:var(--muted);margin:6px 0 10px}
+  .client .order b{color:var(--ink);font-size:15px}
+  .bar{height:8px;border-radius:4px;background:#000;overflow:hidden}
+  .bar > i{display:block;height:100%;width:100%;transition:width .2s linear, background .3s}
+  .empty-slot{flex:1;max-width:33%;border:1px dashed var(--line);border-radius:12px;opacity:.4}
+  #prep{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .prep-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .cup{min-height:30px;display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px;padding:8px;border:1px dashed var(--line);border-radius:8px}
+  .cup span{background:#000;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px}
+  .cup:empty::before{content:"Tasse vide — ajoute des ingrédients";color:var(--muted);font-size:13px}
+  .ingredients{display:flex;flex-wrap:wrap;gap:8px}
+  button{font-family:inherit;cursor:pointer;border:1px solid var(--line);background:#2f2b25;color:var(--ink);
+    border-radius:8px;padding:9px 14px;font-size:14px;transition:background .15s,border-color .15s}
+  button:hover{background:#38332b}
+  button:disabled{opacity:.4;cursor:default}
+  .ingredients button{min-width:96px}
+  .actions{display:flex;gap:10px;margin-top:14px}
+  .actions .serve{background:var(--accent);color:#1c1a17;border-color:var(--accent);font-weight:600;flex:1}
+  .actions .serve:hover{background:#d8b06a}
+  #flash{height:20px;text-align:center;font-size:14px;margin-top:8px;transition:opacity .3s}
+  .ok{color:var(--green)} .ko{color:var(--red)}
+  /* Overlays */
+  .overlay{position:fixed;inset:0;background:rgba(10,9,8,.92);display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:28px;text-align:center}
+  .card h2{margin:0 0 8px;color:var(--accent)}
+  .card p{color:var(--muted);line-height:1.5}
+  .card .big{font-size:40px;color:var(--ink);margin:10px 0}
+  .card button{margin-top:16px;padding:12px 24px;font-size:16px}
+  .hidden{display:none !important}
+  .recipes{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.7}
+  .recipes code{color:var(--ink);background:#000;padding:1px 6px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>L'Addition <small>prototype · jour 1/7</small></h1>
+  <div class="hud">
+    <div>Temps<b id="clock">120</b></div>
+    <div>Recette<b id="money">0€</b></div>
+    <div>Lucidité<b id="lucid">100</b></div>
+  </div>
+</header>
+
+<main>
+  <div class="queue" id="queue"></div>
+
+  <div id="prep">
+    <div class="prep-head">
+      <strong>Préparation</strong>
+      <span id="prep-target" style="color:var(--muted);font-size:13px">Aucun client sélectionné</span>
+    </div>
+    <div class="cup" id="cup"></div>
+    <div class="ingredients" id="ingredients"></div>
+    <div class="actions">
+      <button class="serve" id="btn-serve">Servir</button>
+      <button id="btn-clear">Annuler la tasse</button>
+    </div>
+    <div id="flash"></div>
+  </div>
+
+  <div class="recipes">
+    <strong style="color:var(--ink)">Recettes</strong><br>
+    <code>Espresso</code> tasse · café &nbsp; — &nbsp;
+    <code>Americano</code> tasse · café · eau chaude &nbsp; — &nbsp;
+    <code>Latte</code> tasse · café · lait · mousse &nbsp; — &nbsp;
+    <code>Cappuccino</code> tasse · café · mousse · cacao
+  </div>
+</main>
+
+<!-- Ecran de depart -->
+<div class="overlay" id="start">
+  <div class="card">
+    <h2>L'Addition</h2>
+    <p>Tu es barista, endettée, et il te reste sept jours pour rembourser.
+    Prépare les commandes et sers avant que la patience ne tombe. Mais ce
+    café-là n'est pas tout à fait un café… et plus tu te trompes, moins tu
+    vois clair.</p>
+    <p style="font-size:12px">Clique un client pour le sélectionner, compose sa boisson avec les
+    ingrédients, puis <b>Servir</b>. L'ordre n'a pas d'importance, seuls les ingrédients comptent.</p>
+    <button id="btn-start">Ouvrir le café</button>
+  </div>
+</div>
+
+<!-- Ecran de fin -->
+<div class="overlay hidden" id="end">
+  <div class="card">
+    <h2 id="end-title">Service terminé</h2>
+    <div class="big" id="end-money">0€</div>
+    <p id="end-stats"></p>
+    <p id="end-note" style="color:var(--spirit)"></p>
+    <p style="font-size:12px">Meilleure recette : <b id="best">0€</b></p>
+    <button id="btn-restart">Rejouer la journée</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+// --- Donnees (valeurs de depart du doc de mecaniques) ---
+const RECIPES = {
+  Espresso:   ["tasse","cafe"],
+  Americano:  ["tasse","cafe","eau chaude"],
+  Latte:      ["tasse","cafe","lait","mousse"],
+  Cappuccino: ["tasse","cafe","mousse","cacao"],
+};
+const INGREDIENTS = ["tasse","cafe","eau chaude","lait","mousse","cacao"];
+const CFG = {
+  dayLength: 120,      // s
+  patienceMax: 100,
+  patienceRate: 6,     // /s
+  seuilVert: 60, seuilRouge: 25,
+  queueMax: 3,
+  spawnEvery: 5,       // s
+  prix: 3,
+  errAmb1: 3, errAmb2: 6, // seuils de degradation
+};
+const FACES = ["🙂","😐","🤨","😶","🙃","😑","🫥"];
+
+// --- Etat ---
+let state;
+function freshState(){
+  return {
+    clock: CFG.dayLength, money:0, errors:0, success:0, running:false,
+    clients:[], cup:[], selected:null, spawnTimer:0, nextId:1, amb:0,
+  };
+}
+
+// --- Multiset: validation souple (memes ingredients, memes quantites, ordre ignore) ---
+function multiset(arr){
+  const m={}; for(const x of arr) m[x]=(m[x]||0)+1; return m;
+}
+function sameDrink(a,b){
+  const ma=multiset(a), mb=multiset(b);
+  const keys=new Set([...Object.keys(ma),...Object.keys(mb)]);
+  for(const k of keys) if((ma[k]||0)!==(mb[k]||0)) return false;
+  return true;
+}
+
+// --- DOM ---
+const $=id=>document.getElementById(id);
+const queueEl=$("queue"), cupEl=$("cup"), flashEl=$("flash");
+
+function buildIngredients(){
+  const box=$("ingredients"); box.innerHTML="";
+  for(const ing of INGREDIENTS){
+    const b=document.createElement("button");
+    b.textContent=ing;
+    b.onclick=()=>{ if(!state.running) return; state.cup.push(ing); renderCup(); };
+    box.appendChild(b);
+  }
+}
+function renderCup(){
+  cupEl.innerHTML="";
+  for(const ing of state.cup){
+    const s=document.createElement("span"); s.textContent=ing; cupEl.appendChild(s);
+  }
+}
+function renderQueue(){
+  queueEl.innerHTML="";
+  for(let i=0;i<CFG.queueMax;i++){
+    const c=state.clients[i];
+    if(!c){ const d=document.createElement("div"); d.className="empty-slot"; queueEl.appendChild(d); continue; }
+    const el=document.createElement("div");
+    el.className="client"+(state.selected===c.id?" sel":"");
+    el.onclick=()=>{ state.selected=c.id; $("prep-target").textContent="Commande : "+c.order; renderQueue(); };
+    const pct=Math.max(0,c.patience)/CFG.patienceMax*100;
+    let col=pct>CFG.seuilVert?"var(--green)":(pct>CFG.seuilRouge?"var(--orange)":"var(--red)");
+    el.innerHTML=`<div class="face">${c.face}</div>
+      <div class="order">commande<br><b>${c.order}</b></div>
+      <div class="bar"><i style="width:${pct}%;background:${col}"></i></div>`;
+    queueEl.appendChild(el);
+  }
+}
+function flash(msg,cls){ flashEl.textContent=msg; flashEl.className=cls; setTimeout(()=>{ if(flashEl.textContent===msg) flashEl.textContent=""; },1400); }
+
+function updateHud(){
+  $("clock").textContent=Math.ceil(state.clock);
+  $("money").textContent=state.money+"€";
+  // La lucidite baisse avec les erreurs cumulees (jauge lucidite/deni)
+  const lucid=Math.max(0,100-state.errors*12);
+  $("lucid").textContent=lucid;
+}
+function applyAmbiance(){
+  let amb=0;
+  if(state.errors>=CFG.errAmb2) amb=2; else if(state.errors>=CFG.errAmb1) amb=1;
+  if(amb!==state.amb){
+    state.amb=amb;
+    document.body.classList.toggle("amb1",amb===1);
+    document.body.classList.toggle("amb2",amb===2);
+  }
+}
+
+// --- Clients ---
+function spawnClient(){
+  if(state.clients.length>=CFG.queueMax) return;
+  const names=Object.keys(RECIPES);
+  const order=names[Math.floor(Math.random()*names.length)];
+  state.clients.push({id:state.nextId++, order, patience:CFG.patienceMax, face:FACES[Math.floor(Math.random()*FACES.length)]});
+  renderQueue();
+}
+
+function serve(){
+  if(!state.running) return;
+  const c=state.clients.find(x=>x.id===state.selected);
+  if(!c){ flash("Sélectionne d'abord un client.","ko"); return; }
+  const ok=sameDrink(state.cup, RECIPES[c.order]);
+  if(ok){
+    state.money+=CFG.prix; state.success++;
+    flash(`✓ ${c.order} servi. +${CFG.prix}€`,"ok");
+  }else{
+    state.errors++; applyAmbiance();
+    flash(`✗ Ce n'est pas un ${c.order}.`,"ko");
+  }
+  state.clients=state.clients.filter(x=>x.id!==c.id);
+  state.selected=null; state.cup=[];
+  $("prep-target").textContent="Aucun client sélectionné";
+  renderCup(); renderQueue(); updateHud();
+}
+
+// --- Boucle ---
+let last=0, raf=null;
+function loop(ts){
+  if(!state.running) return;
+  const dt=Math.min(0.1,(ts-last)/1000); last=ts;
+  state.clock-=dt;
+  // patience
+  for(const c of state.clients) c.patience-=CFG.patienceRate*dt;
+  const gone=state.clients.filter(c=>c.patience<=0);
+  if(gone.length){
+    state.errors+=gone.length; applyAmbiance();
+    for(const g of gone) if(state.selected===g.id) state.selected=null;
+    state.clients=state.clients.filter(c=>c.patience>0);
+    flash("Un client est parti, fâché.","ko");
+  }
+  // spawn
+  state.spawnTimer-=dt;
+  if(state.spawnTimer<=0){ spawnClient(); state.spawnTimer=CFG.spawnEvery; }
+  renderQueue(); updateHud();
+  if(state.clock<=0){ endDay(); return; }
+  raf=requestAnimationFrame(loop);
+}
+
+function startDay(){
+  state=freshState(); state.running=true;
+  document.body.classList.remove("amb1","amb2");
+  $("start").classList.add("hidden"); $("end").classList.add("hidden");
+  renderCup(); renderQueue(); updateHud();
+  spawnClient();
+  last=performance.now(); raf=requestAnimationFrame(loop);
+}
+function endDay(){
+  state.running=false; if(raf) cancelAnimationFrame(raf);
+  const best=Math.max(state.money, +(localStorage.getItem("laddition_best")||0));
+  localStorage.setItem("laddition_best", best);
+  $("end-money").textContent=state.money+"€";
+  $("end-stats").textContent=`${state.success} réussites · ${state.errors} ratés`;
+  $("best").textContent=best+"€";
+  // Note narrative selon la lucidite restante
+  let note="";
+  if(state.errors>=CFG.errAmb2) note="Tu as servi des visages que tu ne reconnaissais plus. Le café t'a regardée partir.";
+  else if(state.errors>=CFG.errAmb1) note="L'air a changé vers la fin. Tu préfères ne pas y repenser.";
+  else note="Une bonne journée. Les murs sont restés sages.";
+  $("end-note").textContent=note;
+  $("end").classList.remove("hidden");
+}
+
+// --- Wiring ---
+buildIngredients();
+$("best") && ($("best").textContent=(localStorage.getItem("laddition_best")||0)+"€");
+$("btn-serve").onclick=serve;
+$("btn-clear").onclick=()=>{ state.cup=[]; renderCup(); };
+$("btn-start").onclick=startDay;
+$("btn-restart").onclick=startDay;
+</script>
+</body>
+</html>
